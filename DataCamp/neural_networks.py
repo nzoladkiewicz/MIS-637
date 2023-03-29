@@ -1,4 +1,415 @@
 '''
+Throughout this course, we will use tensorflow version 2.6.0 and will exclusively import the submodules needed to complete each exercise. 
+This will usually be done for you, but you will do it in this exercise by importing constant from tensorflow.
+
+After you have imported constant, you will use it to transform a numpy array, credit_numpy, into a tensorflow constant, credit_constant. 
+This array contains feature columns from a dataset on credit card holders and is previewed in the image below. 
+We will return to this dataset in later chapters.
+
+Note that tensorflow 2 allows you to use data as either a numpy array or a tensorflow constant object. 
+Using a constant will ensure that any operations performed with that object are done in tensorflow.
+'''
+
+# Import constant from TensorFlow
+from tensorflow import constant
+
+# Convert the credit_numpy array into a tensorflow constant
+credit_constant = constant(credit_numpy)
+
+# Print constant datatype
+print('\n The datatype is:', credit_constant.dtype)
+
+# Print constant shape
+print('\n The shape is:', credit_constant.shape)
+
+
+'''
+Unlike a constant, a variable's value can be modified. 
+This will be useful when we want to train a model by updating its parameters.
+
+Let's try defining and printing a variable. 
+We'll then convert the variable to a numpy array, print again, and check for differences. 
+Note that Variable(), which is used to create a variable tensor, has been imported from tensorflow and is available to use in the exercise.
+'''
+
+# Define the 1-dimensional variable A1
+A1 = Variable([1, 2, 3, 4])
+
+# Print the variable A1
+print('\n A1: ', A1)
+
+# Convert A1 to a numpy array and assign it to B1
+B1 = A1.numpy()
+
+# Print B1
+print('\n B1: ', B1)
+
+
+'''
+Element-wise multiplication in TensorFlow is performed using two tensors with identical shapes. 
+This is because the operation multiplies elements in corresponding positions in the two tensors. 
+An example of an element-wise multiplication, denoted by the ⊙ symbol, is shown below:
+
+In this exercise, you will perform element-wise multiplication, paying careful attention to the shape of the tensors you multiply. 
+Note that multiply(), constant(), and ones_like() have been imported for you.
+'''
+
+# Define tensors A1 and A23 as constants
+A1 = constant([1, 2, 3, 4])
+A23 = constant([[1, 2, 3], [1, 6, 4]])
+
+# Define B1 and B23 to have the correct shape
+B1 = ones_like(A1)
+B23 = ones_like(A23)
+
+# Perform element-wise multiplication
+C1 = multiply(A1, B1)
+C23 = multiply(A23, B23)
+
+# Print the tensors C1 and C23
+print('\n C1: {}'.format(C1.numpy()))
+print('\n C23: {}'.format(C23.numpy()))
+
+
+'''
+In later chapters, you will learn to train linear regression models. 
+This process will yield a vector of parameters that can be multiplied by the input data to generate predictions. 
+In this exercise, you will use input data, features, and a target vector, bill, which are taken from a credit card dataset we will use later in the course.
+
+The matrix of input data, features, contains two columns: education level and age. 
+The target vector, bill, is the size of the credit card borrower's bill.
+
+Since we have not trained the model, you will enter a guess for the values of the parameter vector, params. 
+You will then use matmul() to perform matrix multiplication of features by params to generate predictions, billpred, which you will compare with bill. 
+Note that we have imported matmul() and constant().
+'''
+
+# Define features, params, and bill as constants
+features = constant([[2, 24], [2, 26], [2, 57], [1, 37]])
+params = constant([[1000], [150]])
+bill = constant([[3913], [2682], [8617], [64400]])
+
+# Compute billpred using features and params
+billpred = matmul(features, params)
+
+# Compute and print the error
+error = bill - billpred
+print(error.numpy())
+
+
+'''
+Later in the course, you will classify images of sign language letters using a neural network. 
+In some cases, the network will take 1-dimensional tensors as inputs, but your data will come in the form of images, which will either be either 2- or 3-dimensional tensors, depending on whether they are grayscale or color images.
+
+The figure below shows grayscale and color images of the sign language letter A. 
+The two images have been imported for you and converted to the numpy arrays gray_tensor and color_tensor. 
+Reshape these arrays into 1-dimensional vectors using the reshape operation, which has been imported for you from tensorflow. 
+Note that the shape of gray_tensor is 28x28 and the shape of color_tensor is 28x28x3.
+'''
+
+# Reshape the grayscale image tensor into a vector
+gray_vector = reshape(gray_tensor, (784, 1))
+
+# Reshape the color image tensor into a vector
+color_vector = reshape(color_tensor, (2352, 1))
+
+
+'''
+You are given a loss function, y=x^2, which you want to minimize. 
+You can do this by computing the slope using the GradientTape() operation at different values of x. 
+If the slope is positive, you can decrease the loss by lowering x. 
+If it is negative, you can decrease it by increasing x. 
+This is how gradient descent works.
+
+In practice, you will use a high level tensorflow operation to perform gradient descent automatically. 
+In this exercise, however, you will compute the slope at x values of -1, 1, and 0. 
+The following operations are available: GradientTape(), multiply(), and Variable().
+'''
+
+def compute_gradient(x0):
+  	# Define x as a variable with an initial value of x0
+	x = Variable(x0)
+	with GradientTape() as tape:
+		tape.watch(x)
+        # Define y using the multiply operation
+		y = multiply(x, x)
+    # Return the gradient of y with respect to x
+	return tape.gradient(y, x).numpy()
+
+# Compute and print gradients at x = -1, 1, and 0
+print(compute_gradient(-1.0))
+print(compute_gradient(1.0))
+print(compute_gradient(0.0))
+
+
+'''
+You are given a black-and-white image of a letter, which has been encoded as a tensor, letter. 
+You want to determine whether the letter is an X or a K. 
+You don't have a trained neural network, but you do have a simple model, model, which can be used to classify letter.
+
+The 3x3 tensor, letter, and the 1x3 tensor, model, are available in the Python shell. 
+You can determine whether letter is a K by multiplying letter by model, summing over the result, and then checking if it is equal to 1. 
+As with more complicated models, such as neural networks, model is a collection of weights, arranged in a tensor.
+
+Note that the functions reshape(), matmul(), and reduce_sum() have been imported from tensorflow and are available for use.
+'''
+
+# Reshape model from a 1x3 to a 3x1 tensor
+model = reshape(model, (3, 1))
+
+# Multiply letter by model
+output = matmul(letter, model)
+
+# Sum over output and print prediction using the numpy method
+prediction = reduce_sum(output)
+print(prediction.numpy())
+
+
+'''
+Before you can train a machine learning model, you must first import data. 
+There are several valid ways to do this, but for now, we will use a simple one-liner from pandas: pd.read_csv(). 
+Recall from the video that the first argument specifies the path or URL. All other arguments are optional.
+
+In this exercise, you will import the King County housing dataset, which we will use to train a linear model later in the chapter.
+'''
+
+# Import pandas under the alias pd
+import pandas as pd
+
+# Assign the path to a string variable named data_path
+data_path = 'kc_house_data.csv'
+
+# Load the dataset as a dataframe named housing
+housing = pd.read_csv(data_path)
+
+# Print the price column of housing
+print(housing['price'])
+
+
+'''
+In this exercise, you will both load data and set its type. 
+Note that housing is available and pandas has been imported as pd. 
+You will import numpy and tensorflow, and define tensors that are usable in tensorflow using columns in housing with a given data type. 
+Recall that you can select the price column, for instance, from housing using housing['price'].
+'''
+
+# Import numpy and tensorflow with their standard aliases
+import numpy as np
+import tensorflow as tf
+
+# Use a numpy array to define price as a 32-bit float
+price = np.array(housing['price'], np.float32)
+
+# Define waterfront as a Boolean using cast
+waterfront = tf.cast(housing['waterfront'], tf.bool)
+
+# Print price and waterfront
+print(price)
+print(waterfront)
+
+
+'''
+In this exercise, you will compute the loss using data from the King County housing dataset. 
+You are given a target, price, which is a tensor of house prices, and predictions, which is a tensor of predicted house prices. 
+You will evaluate the loss function and print out the value of the loss.
+'''
+
+# Import the keras module from tensorflow
+from tensorflow import keras
+
+# Compute the mean absolute error (mae)
+loss = keras.losses.mse(price, predictions)
+
+# Print the mean absolute error (mae)
+print(loss.numpy())
+
+
+'''
+Modify your code to compute the mean absolute error (mae), rather than the mean squared error (mse).
+'''
+
+# Import the keras module from tensorflow
+from tensorflow import keras
+
+# Compute the mean absolute error (mae)
+loss = keras.losses.mae(price, predictions)
+
+# Print the mean absolute error (mae)
+print(loss.numpy())
+
+
+'''
+In the previous exercise, you defined a tensorflow loss function and then evaluated it once for a set of actual and predicted values. 
+In this exercise, you will compute the loss within another function called loss_function(), which first generates predicted values from the data and variables. 
+The purpose of this is to construct a function of the trainable model variables that returns the loss. 
+You can then repeatedly evaluate this function for different variable values until you find the minimum. 
+In practice, you will pass this function to an optimizer in tensorflow. 
+Note that features and targets have been defined and are available. 
+Additionally, Variable, float32, and keras are available.
+'''
+
+# Initialize a variable named scalar
+scalar = Variable(1.0, dtype=float32)
+
+# Define the model
+def model(scalar, features = features):
+  	return scalar * features
+
+# Define a loss function
+def loss_function(scalar, features = features, targets = targets):
+	# Compute the predicted values
+	predictions = model(scalar, features)
+    
+	# Return the mean absolute error loss
+	return keras.losses.mean_absolute_error(targets, predictions)
+
+# Evaluate the loss function and print the loss
+print(loss_function(scalar).numpy())
+
+
+'''
+A univariate linear regression identifies the relationship between a single feature and the target tensor. 
+In this exercise, we will use a property's lot size and price. 
+Just as we discussed in the video, we will take the natural logarithms of both tensors, which are available as price_log and size_log.
+
+In this exercise, you will define the model and the loss function. 
+You will then evaluate the loss function for two different values of intercept and slope. 
+Remember that the predicted values are given by intercept + features*slope. 
+Additionally, note that keras.losses.mse() is available for you. 
+Furthermore, slope and intercept have been defined as variables.
+'''
+
+# Define a linear regression model
+def linear_regression(intercept, slope, features = size_log):
+	return intercept + slope * features
+
+# Set loss_function() to take the variables as arguments
+def loss_function(intercept, slope, features = size_log, targets = price_log):
+	# Set the predicted values
+	predictions = linear_regression(intercept, slope, features)
+    
+    # Return the mean squared error loss
+	return keras.losses.mean_squared_error(targets, predictions)
+
+# Compute the loss for different slope and intercept values
+print(loss_function(0.1, 0.1).numpy())
+print(loss_function(0.1, 0.5).numpy())
+
+
+'''
+In this exercise, we will pick up where the previous exercise ended. 
+The intercept and slope, intercept and slope, have been defined and initialized. 
+Additionally, a function has been defined, loss_function(intercept, slope), which computes the loss using the data and model variables.
+
+You will now define an optimization operation as opt. 
+You will then train a univariate linear model by minimizing the loss to find the optimal values of intercept and slope. 
+Note that the opt operation will try to move closer to the optimum with each step, but will require many steps to find it. 
+Thus, you must repeatedly execute the operation.
+'''
+
+# Initialize an Adam optimizer
+opt = keras.optimizers.Adam(0.5)
+
+for j in range(100):
+	# Apply minimize, pass the loss function, and supply the variables
+	opt.minimize(lambda: loss_function(intercept, slope), var_list=[intercept, slope])
+
+	# Print every 10th value of the loss
+	if j % 10 == 0:
+		print(loss_function(intercept, slope).numpy())
+
+# Plot data and regression line
+plot_results(intercept, slope)
+
+
+'''
+In most cases, performing a univariate linear regression will not yield a model that is useful for making accurate predictions. 
+In this exercise, you will perform a multiple regression, which uses more than one feature.
+
+You will use price_log as your target and size_log and bedrooms as your features. 
+Each of these tensors has been defined and is available. 
+You will also switch from using the the mean squared error loss to the mean absolute error loss: keras.losses.mae(). 
+Finally, the predicted values are computed as follows: params[0] + feature1*params[1] + feature2*params[2]. 
+Note that we've defined a vector of parameters, params, as a variable, rather than using three variables. 
+Here, params[0] is the intercept and params[1] and params[2] are the slopes.
+'''
+
+# Define the linear regression model
+def linear_regression(params, feature1 = size_log, feature2 = bedrooms):
+	return params[0] + feature1*params[1] + feature2*params[2]
+
+# Define the loss function
+def loss_function(params, targets = price_log, feature1 = size_log, feature2 = bedrooms):
+	# Set the predicted values
+	predictions = linear_regression(params, feature1, feature2)
+  
+	# Use the mean absolute error loss
+	return keras.losses.mean_absolute_error(targets, predictions)
+
+# Define the optimize operation
+opt = keras.optimizers.Adam()
+
+# Perform minimization and print trainable variables
+for j in range(10):
+	opt.minimize(lambda: loss_function(params, price_log, size_log, bedrooms), var_list=[params])
+	print_results(params)
+	
+	
+'''
+Before we can train a linear model in batches, we must first define variables, a loss function, and an optimization operation. 
+In this exercise, we will prepare to train a model that will predict price_batch, a batch of house prices, using size_batch, a batch of lot sizes in square feet. 
+In contrast to the previous lesson, we will do this by loading batches of data using pandas, converting it to numpy arrays, and then using it to minimize the loss function in steps.
+
+Variable(), keras(), and float32 have been imported for you. 
+Note that you should not set default argument values for either the model or loss function, since we will generate the data in batches during the training process.
+'''
+
+# Define the intercept and slope
+intercept = Variable(10.0, float32)
+slope = Variable(0.5, float32)
+
+# Define the model
+def linear_regression(intercept, slope, features):
+	# Define the predicted values
+	return intercept + slope * features
+
+# Define the loss function
+def loss_function(intercept, slope, targets, features):
+	# Define the predicted values
+	predictions = linear_regression(intercept, slope, features)
+    
+ 	# Define the MSE loss
+	return keras.losses.mean_squared_error(targets, predictions)
+
+
+'''
+In this exercise, we will train a linear regression model in batches, starting where we left off in the previous exercise. 
+We will do this by stepping through the dataset in batches and updating the model's variables, intercept and slope, after each step. 
+This approach will allow us to train with datasets that are otherwise too large to hold in memory.
+
+Note that the loss function,loss_function(intercept, slope, targets, features), has been defined for you. 
+Additionally, keras has been imported for you and numpy is available as np. 
+The trainable variables should be entered into var_list in the order in which they appear as loss function arguments.
+'''
+
+# Initialize Adam optimizer
+opt = keras.optimizers.Adam()
+
+# Load data in batches
+for batch in pd.read_csv('kc_house_data.csv', chunksize=100):
+	size_batch = np.array(batch['sqft_lot'], np.float32)
+
+	# Extract the price values for the current batch
+	price_batch = np.array(batch['price'], np.float32)
+
+	# Complete the loss, fill in the variable list, and minimize
+	opt.minimize(lambda: loss_function(intercept, slope, price_batch, size_batch), var_list=[intercept, slope])
+
+# Print trained parameters
+print(intercept.numpy(), slope.numpy())
+
+
+'''
 There are two ways to define a dense layer in tensorflow. 
 The first involves the use of low-level, linear algebraic operations. 
 The second makes use of high-level keras operations. 
@@ -291,4 +702,155 @@ model.add(keras.layers.Dense(4, activation='softmax'))
 # Print the model architecture
 print(model.summary())
 
+
+'''
+In this exercise, we return to our sign language letter classification problem. 
+We have 2000 images of four letters--A, B, C, and D--and we want to classify them with a high level of accuracy. 
+We will complete all parts of the problem, including the model definition, compilation, and training.
+
+Note that keras has been imported from tensorflow for you. 
+Additionally, the features are available as sign_language_features and the targets are available as sign_language_labels.
+'''
+
+# Define a sequential model
+model = keras.Sequential()
+
+# Define a hidden layer
+model.add(keras.layers.Dense(16, activation='relu', input_shape=(784,)))
+
+# Define the output layer
+model.add(keras.layers.Dense(4, activation='softmax'))
+
+# Compile the model
+model.compile(optimizer='SGD', loss='categorical_crossentropy')
+
+# Complete the fitting operation
+model.fit(sign_language_features, sign_language_labels, epochs=5)
+
+
+'''
+We trained a model to predict sign language letters in the previous exercise, but it is unclear how successful we were in doing so. 
+In this exercise, we will try to improve upon the interpretability of our results. 
+Since we did not use a validation split, we only observed performance improvements within the training set; however, it is unclear how much of that was due to overfitting. 
+Furthermore, since we did not supply a metric, we only saw decreases in the loss function, which do not have any clear interpretation.
+
+Note that keras has been imported for you from tensorflow.
+'''
+
+# Define sequential model
+model = keras.Sequential()
+
+# Define the first layer
+model.add(keras.layers.Dense(32, activation='sigmoid', input_shape=(784,)))
+
+# Add activation function to classifier
+model.add(keras.layers.Dense(4, activation='softmax'))
+
+# Set the optimizer, loss function, and metrics
+model.compile(optimizer='RMSprop', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Add the number of epochs and the validation split
+model.fit(sign_language_features, sign_language_labels, epochs=10, validation_split=0.1)
+
+
+'''
+In this exercise, we'll work with a small subset of the examples from the original sign language letters dataset. 
+A small sample, coupled with a heavily-parameterized model, will generally lead to overfitting. 
+This means that your model will simply memorize the class of each example, rather than identifying features that generalize to many examples.
+
+You will detect overfitting by checking whether the validation sample loss is substantially higher than the training sample loss and whether it increases with further training. 
+With a small sample and a high learning rate, the model will struggle to converge on an optimum. 
+You will set a low learning rate for the optimizer, which will make it easier to identify overfitting.
+
+Note that keras has been imported from tensorflow.
+'''
+
+# Define sequential model
+model = keras.Sequential()
+
+# Define the first layer
+model.add(keras.layers.Dense(1024, activation='relu', input_shape=(784,)))
+
+# Add activation function to classifier
+model.add(keras.layers.Dense(4, activation='softmax'))
+
+# Finish the model compilation
+model.compile(optimizer=keras.optimizers.Adam(lr=0.001), 
+              loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Complete the model fit operation
+model.fit(sign_language_features, sign_language_labels, epochs=50, validation_split=0.5)
+
+
+'''
+Two models have been trained and are available: large_model, which has many parameters; and small_model, which has fewer parameters. 
+Both models have been trained using train_features and train_labels, which are available to you. 
+A separate test set, which consists of test_features and test_labels, is also available.
+
+Your goal is to evaluate relative model performance and also determine whether either model exhibits signs of overfitting. 
+You will do this by evaluating large_model and small_model on both the train and test sets. 
+For each model, you can do this by applying the .evaluate(x, y) method to compute the loss for features x and labels y. 
+You will then compare the four losses generated.
+'''
+
+# Evaluate the small model using the train data
+small_train = small_model.evaluate(train_features, train_labels)
+
+# Evaluate the small model using the test data
+small_test = small_model.evaluate(test_features, test_labels)
+
+# Evaluate the large model using the train data
+large_train = large_model.evaluate(train_features, train_labels)
+
+# Evaluate the large model using the test data
+large_test = large_model.evaluate(test_features, test_labels)
+
+# Print losses
+print('\n Small - Train: {}, Test: {}'.format(small_train, small_test))
+print('Large - Train: {}, Test: {}'.format(large_train, large_test))
+
+
+'''
+For this exercise, we'll return to the King County housing transaction dataset from chapter 2. 
+We will again develop and train a machine learning model to predict house prices; however, this time, we'll do it using the estimator API.
+
+Rather than completing everything in one step, we'll break this procedure down into parts. 
+We'll begin by defining the feature columns and loading the data. 
+In the next exercise, we'll define and train a premade estimator. 
+Note that feature_column has been imported for you from tensorflow. 
+Additionally, numpy has been imported as np, and the Kings County housing dataset is available as a pandas DataFrame: housing.
+'''
+
+# Define feature columns for bedrooms and bathrooms
+bedrooms = feature_column.numeric_column("bedrooms")
+bathrooms = feature_column.numeric_column("bathrooms")
+
+# Define the list of feature columns
+feature_list = [bedrooms, bathrooms]
+
+def input_fn():
+	# Define the labels
+	labels = np.array(housing['price'])
+	# Define the features
+	features = {'bedrooms':np.array(housing['bedrooms']), 
+                'bathrooms':np.array(housing['bathrooms'])}
+	return features, labels
+
+
+'''
+In the previous exercise, you defined a list of feature columns, feature_list, and a data input function, input_fn(). 
+In this exercise, you will build on that work by defining an estimator that makes use of input data.
+'''
+
+# Define the model and set the number of steps
+model = estimator.DNNRegressor(feature_columns=feature_list, hidden_units=[2,2])
+model.train(input_fn, steps=1)
+
+'''
+Modify the code to use a LinearRegressor(), remove the hidden_units, and set the number of steps to 2
+'''
+
+# Define the model and set the number of steps
+model = estimator.LinearRegressor(feature_columns=feature_list)
+model.train(input_fn, steps=2)
 
